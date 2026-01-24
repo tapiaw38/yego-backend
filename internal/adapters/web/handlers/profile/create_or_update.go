@@ -3,18 +3,16 @@ package profile
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"wappi/internal/adapters/web/middlewares"
 	apperrors "wappi/internal/platform/errors"
 	"wappi/internal/platform/errors/mappings"
 	profileUsecase "wappi/internal/usecases/profile"
+
+	"github.com/gin-gonic/gin"
 )
 
-// NewCreateOrUpdateHandler creates a handler for creating or updating a profile
-// User ID is extracted from JWT token (set by AuthMiddleware)
 func NewCreateOrUpdateHandler(usecase profileUsecase.CreateOrUpdateProfileUsecase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from JWT context (set by AuthMiddleware)
 		userID, exists := middlewares.GetUserIDFromContext(c)
 		if !exists || userID == "" {
 			appErr := apperrors.NewApplicationError(mappings.UnauthorizedError, nil)
@@ -41,4 +39,3 @@ func NewCreateOrUpdateHandler(usecase profileUsecase.CreateOrUpdateProfileUsecas
 		c.JSON(http.StatusOK, output)
 	}
 }
-
