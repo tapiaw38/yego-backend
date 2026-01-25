@@ -11,11 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
+// UpdateOrderInputItem represents an item in the order data
+type UpdateOrderInputItem struct {
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Quantity int     `json:"quantity"`
+}
+
+// UpdateOrderInputData represents the order data structure
+type UpdateOrderInputData struct {
+	Items []UpdateOrderInputItem `json:"items"`
+}
+
 // UpdateOrderInput represents the input for updating an order
 type UpdateOrderInput struct {
-	Status        *string `json:"status,omitempty"`
-	StatusMessage *string `json:"status_message,omitempty"`
-	ETA           *string `json:"eta,omitempty"`
+	Status        *string               `json:"status,omitempty"`
+	StatusMessage *string               `json:"status_message,omitempty"`
+	ETA           *string               `json:"eta,omitempty"`
+	Data          *UpdateOrderInputData `json:"data,omitempty"`
 }
 
 // UpdateOrderUsecase defines the interface for updating orders
@@ -59,6 +72,18 @@ func (u *updateOrderUsecase) Execute(ctx context.Context, id string, input Updat
 
 	if input.ETA != nil {
 		order.ETA = *input.ETA
+	}
+
+	if input.Data != nil {
+		items := make([]domain.OrderItem, len(input.Data.Items))
+		for i, item := range input.Data.Items {
+			items[i] = domain.OrderItem{
+				Name:     item.Name,
+				Price:    item.Price,
+				Quantity: item.Quantity,
+			}
+		}
+		order.Data = &domain.OrderData{Items: items}
 	}
 
 	// Save changes
