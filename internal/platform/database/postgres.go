@@ -64,7 +64,6 @@ func RunMigrations(db *sql.DB) error {
 		profile_id UUID REFERENCES profiles(id),
 		user_id VARCHAR(255),
 		status VARCHAR(50) NOT NULL DEFAULT 'CREATED',
-		status_message TEXT,
 		eta VARCHAR(255),
 		created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -94,14 +93,6 @@ func RunMigrations(db *sql.DB) error {
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'data') THEN
 			ALTER TABLE orders ADD COLUMN data JSONB;
-		END IF;
-	END $$;
-
-	-- Add status_message column to orders if it doesn't exist
-	DO $$
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'status_message') THEN
-			ALTER TABLE orders ADD COLUMN status_message TEXT;
 		END IF;
 	END $$;
 

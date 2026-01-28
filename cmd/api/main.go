@@ -6,6 +6,7 @@ import (
 	orderRepo "wappi/internal/adapters/datasources/repositories/order"
 	ordertokenRepo "wappi/internal/adapters/datasources/repositories/ordertoken"
 	profileRepo "wappi/internal/adapters/datasources/repositories/profile"
+	settingsRepo "wappi/internal/adapters/datasources/repositories/settings"
 	"wappi/internal/adapters/web"
 	"wappi/internal/adapters/web/middlewares"
 	"wappi/internal/platform/config"
@@ -13,6 +14,7 @@ import (
 	adminUsecase "wappi/internal/usecases/admin"
 	orderUsecase "wappi/internal/usecases/order"
 	profileUsecase "wappi/internal/usecases/profile"
+	settingsUsecase "wappi/internal/usecases/settings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,11 +34,13 @@ func main() {
 	orderRepository := orderRepo.NewRepository(db)
 	orderTokenRepository := ordertokenRepo.NewRepository(db)
 	profileRepository := profileRepo.NewRepository(db)
+	settingsRepository := settingsRepo.NewRepository(db)
 
 	// Initialize use cases
 	orderUsecases := orderUsecase.NewUsecases(orderRepository, orderTokenRepository, profileRepository)
 	profileUsecases := profileUsecase.NewUsecases(profileRepository)
 	adminUsecases := adminUsecase.NewUsecases(profileRepository, orderRepository)
+	settingsUsecases := settingsUsecase.NewUsecases(settingsRepository)
 
 	// Setup Gin
 	gin.SetMode(cfg.GinMode)
@@ -46,7 +50,7 @@ func main() {
 	app.Use(middlewares.CORSMiddleware())
 
 	// Register routes
-	web.RegisterRoutes(app, orderUsecases, profileUsecases, adminUsecases, cfg.FrontendURL)
+	web.RegisterRoutes(app, orderUsecases, profileUsecases, adminUsecases, settingsUsecases, cfg.FrontendURL)
 
 	// Health check endpoint
 	app.GET("/health", func(c *gin.Context) {

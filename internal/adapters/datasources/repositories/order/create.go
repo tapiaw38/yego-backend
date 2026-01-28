@@ -23,8 +23,8 @@ func (r *repository) Create(ctx context.Context, order *domain.Order) (*domain.O
 	}
 
 	query := `
-		INSERT INTO orders (id, profile_id, user_id, status, status_message, eta, data, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO orders (id, profile_id, user_id, status, eta, data, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	_, err = r.db.ExecContext(ctx, query,
@@ -32,7 +32,6 @@ func (r *repository) Create(ctx context.Context, order *domain.Order) (*domain.O
 		order.ProfileID,
 		order.UserID,
 		order.Status,
-		order.StatusMessage,
 		order.ETA,
 		dataJSON,
 		order.CreatedAt,

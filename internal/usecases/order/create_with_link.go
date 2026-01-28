@@ -15,6 +15,7 @@ type CreateWithLinkItemInput struct {
 	Name     string  `json:"name"`
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
+	Weight   *int    `json:"weight,omitempty"`
 }
 
 // CreateWithLinkDataInput represents the order data/items
@@ -73,6 +74,7 @@ func (u *createWithLinkUsecase) Execute(ctx context.Context, input CreateWithLin
 				Name:     item.Name,
 				Price:    item.Price,
 				Quantity: item.Quantity,
+				Weight:   item.Weight,
 			}
 		}
 		newOrder.Data = &domain.OrderData{Items: items}

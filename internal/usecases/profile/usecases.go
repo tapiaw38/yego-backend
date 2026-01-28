@@ -6,13 +6,12 @@ import (
 
 // Usecases aggregates all profile-related use cases
 type Usecases struct {
-	GenerateLink       GenerateLinkUsecase
-	ValidateToken      ValidateTokenUsecase
-	CompleteProfile    CompleteProfileUsecase
-	Get                GetProfileUsecase
-	Update             UpdateProfileUsecase
-	CreateOrUpdate     CreateOrUpdateProfileUsecase
-	CheckCompleted     CheckCompletedUsecase
+	GenerateLink    GenerateLinkUsecase
+	ValidateToken   ValidateTokenUsecase
+	CompleteProfile CompleteProfileUsecase
+	Get             GetProfileUsecase
+	Update          UpdateProfileUsecase
+	CheckCompleted  CheckCompletedUsecase
 }
 
 // NewUsecases creates all profile use cases
@@ -23,7 +22,6 @@ func NewUsecases(repo profileRepo.Repository) *Usecases {
 		CompleteProfile: NewCompleteProfileUsecase(repo),
 		Get:             NewGetProfileUsecase(repo),
 		Update:          NewUpdateProfileUsecase(repo),
-		CreateOrUpdate:  NewCreateOrUpdateProfileUsecase(repo),
 		CheckCompleted:  NewCheckCompletedUsecase(repo),
 	}
 }

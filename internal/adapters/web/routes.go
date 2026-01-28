@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/gin-gonic/gin"
 	adminHandler "wappi/internal/adapters/web/handlers/admin"
 	orderHandler "wappi/internal/adapters/web/handlers/order"
 	profileHandler "wappi/internal/adapters/web/handlers/profile"
@@ -8,20 +9,16 @@ import (
 	adminUsecase "wappi/internal/usecases/admin"
 	orderUsecase "wappi/internal/usecases/order"
 	profileUsecase "wappi/internal/usecases/profile"
-
-	"github.com/gin-gonic/gin"
 )
 
 // RegisterRoutes registers all application routes
-func RegisterRoutes(app *gin.Engine, orderUsecases *orderUsecase.Usecases, profileUsecases *profileUsecase.Usecases, adminUsecases *adminUsecase.Usecases, frontendURL string) {
+func RegisterRoutes(app *gin.Engine, orderUsecases *orderUsecase.Usecases, profileUsecases *profileUsecase.Usecases, adminUsecases *adminUsecase.Usecases) {
 	api := app.Group("/api")
 
 	// Public order routes (tracking by UUID - no auth needed)
 	orders := api.Group("/orders")
 	{
 		orders.GET("/:id", orderHandler.NewGetHandler(orderUsecases.Get))
-		// WhatsApp IA endpoint - creates order with claim link (public for IA access)
-		orders.POST("/create-with-link", orderHandler.NewCreateWithLinkHandler(orderUsecases.CreateWithLink, frontendURL))
 	}
 
 	// Protected order routes (require auth)
@@ -30,10 +27,6 @@ func RegisterRoutes(app *gin.Engine, orderUsecases *orderUsecase.Usecases, profi
 	{
 		ordersAuth.POST("", orderHandler.NewCreateHandler(orderUsecases.Create))
 		ordersAuth.PATCH("/:id/status", orderHandler.NewUpdateStatusHandler(orderUsecases.UpdateStatus))
-		// Claim order via token - requires auth to identify user
-		ordersAuth.POST("/claim/:token", orderHandler.NewClaimHandler(orderUsecases.Claim))
-		// List current user's orders
-		ordersAuth.GET("/my", orderHandler.NewListMyHandler(orderUsecases.ListMyOrders))
 	}
 
 	// Public profile routes (token-based access)
@@ -51,8 +44,6 @@ func RegisterRoutes(app *gin.Engine, orderUsecases *orderUsecase.Usecases, profi
 	{
 		profilesAuth.POST("/generate-link", profileHandler.NewGenerateLinkHandler(profileUsecases.GenerateLink))
 		profilesAuth.GET("/check-completed", profileHandler.NewCheckCompletedHandler(profileUsecases.CheckCompleted))
-		profilesAuth.POST("", profileHandler.NewCreateOrUpdateHandler(profileUsecases.CreateOrUpdate))
-		profilesAuth.PUT("", profileHandler.NewCreateOrUpdateHandler(profileUsecases.CreateOrUpdate))
 	}
 
 	// Admin routes (open for now - no authentication)

@@ -11,24 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
-// UpdateOrderInputItem represents an item in the order data
-type UpdateOrderInputItem struct {
-	Name     string  `json:"name"`
-	Price    float64 `json:"price"`
-	Quantity int     `json:"quantity"`
-}
-
-// UpdateOrderInputData represents the order data structure
-type UpdateOrderInputData struct {
-	Items []UpdateOrderInputItem `json:"items"`
-}
-
 // UpdateOrderInput represents the input for updating an order
 type UpdateOrderInput struct {
-	Status        *string               `json:"status,omitempty"`
-	StatusMessage *string               `json:"status_message,omitempty"`
-	ETA           *string               `json:"eta,omitempty"`
-	Data          *UpdateOrderInputData `json:"data,omitempty"`
+	Status *string `json:"status,omitempty"`
+	ETA    *string `json:"eta,omitempty"`
 }
 
 // UpdateOrderUsecase defines the interface for updating orders
@@ -66,24 +52,8 @@ func (u *updateOrderUsecase) Execute(ctx context.Context, id string, input Updat
 		order.Status = domain.OrderStatus(*input.Status)
 	}
 
-	if input.StatusMessage != nil {
-		order.StatusMessage = input.StatusMessage
-	}
-
 	if input.ETA != nil {
 		order.ETA = *input.ETA
-	}
-
-	if input.Data != nil {
-		items := make([]domain.OrderItem, len(input.Data.Items))
-		for i, item := range input.Data.Items {
-			items[i] = domain.OrderItem{
-				Name:     item.Name,
-				Price:    item.Price,
-				Quantity: item.Quantity,
-			}
-		}
-		order.Data = &domain.OrderData{Items: items}
 	}
 
 	// Save changes
@@ -98,15 +68,14 @@ func (u *updateOrderUsecase) Execute(ctx context.Context, id string, input Updat
 	}
 
 	return &OrderOutput{
-		ID:            updatedOrder.ID,
-		ProfileID:     updatedOrder.ProfileID,
-		UserID:        updatedOrder.UserID,
-		Status:        string(updatedOrder.Status),
-		StatusMessage:  updatedOrder.StatusMessage,
-		StatusIndex:    updatedOrder.StatusIndex(),
-		ETA:            updatedOrder.ETA,
-		CreatedAt:      updatedOrder.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:      updatedOrder.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-		AllStatuses:    allStatuses,
+		ID:          updatedOrder.ID,
+		ProfileID:   updatedOrder.ProfileID,
+		UserID:      updatedOrder.UserID,
+		Status:      string(updatedOrder.Status),
+		StatusIndex: updatedOrder.StatusIndex(),
+		ETA:         updatedOrder.ETA,
+		CreatedAt:   updatedOrder.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   updatedOrder.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		AllStatuses: allStatuses,
 	}, nil
 }

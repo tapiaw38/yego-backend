@@ -8,23 +8,10 @@ import (
 	apperrors "wappi/internal/platform/errors"
 )
 
-// CreateItemInput represents a single item in the order
-type CreateItemInput struct {
-	Name     string  `json:"name"`
-	Price    float64 `json:"price"`
-	Quantity int     `json:"quantity"`
-}
-
-// CreateDataInput represents the order data/items
-type CreateDataInput struct {
-	Items []CreateItemInput `json:"items"`
-}
-
 // CreateInput represents the input for creating an order
 type CreateInput struct {
-	ProfileID string          `json:"profile_id" binding:"required"`
-	ETA       string          `json:"eta"`
-	Data      *CreateDataInput `json:"data,omitempty"`
+	ProfileID string `json:"profile_id" binding:"required"`
+	ETA       string `json:"eta"`
 }
 
 // CreateOutput represents the output after creating an order
@@ -57,19 +44,6 @@ func (u *createUsecase) Execute(ctx context.Context, input CreateInput) (*Create
 	newOrder := &domain.Order{
 		ProfileID: &input.ProfileID,
 		ETA:       input.ETA,
-	}
-
-	// Convert input data to domain OrderData if provided
-	if input.Data != nil && len(input.Data.Items) > 0 {
-		items := make([]domain.OrderItem, len(input.Data.Items))
-		for i, item := range input.Data.Items {
-			items[i] = domain.OrderItem{
-				Name:     item.Name,
-				Price:    item.Price,
-				Quantity: item.Quantity,
-			}
-		}
-		newOrder.Data = &domain.OrderData{Items: items}
 	}
 
 	created, err := u.repo.Create(ctx, newOrder)

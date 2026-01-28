@@ -9,14 +9,12 @@ import (
 type OrderStatus string
 
 const (
-	StatusCreated              OrderStatus = "CREATED"
-	StatusConfirmed            OrderStatus = "CONFIRMED"
-	StatusPreparing            OrderStatus = "PREPARING"
-	StatusOnTheWay             OrderStatus = "ON_THE_WAY"
-	StatusDelivered            OrderStatus = "DELIVERED"
-	StatusPaused               OrderStatus = "PAUSED"
-	StatusCancelled            OrderStatus = "CANCELLED"
-	StatusModificationRequested OrderStatus = "MODIFICATION_REQUESTED"
+	StatusCreated   OrderStatus = "CREATED"
+	StatusConfirmed OrderStatus = "CONFIRMED"
+	StatusPreparing OrderStatus = "PREPARING"
+	StatusOnTheWay  OrderStatus = "ON_THE_WAY"
+	StatusDelivered OrderStatus = "DELIVERED"
+	StatusCancelled OrderStatus = "CANCELLED"
 )
 
 // ValidStatuses contains all valid order statuses in order
@@ -26,9 +24,7 @@ var ValidStatuses = []OrderStatus{
 	StatusPreparing,
 	StatusOnTheWay,
 	StatusDelivered,
-	StatusPaused,
 	StatusCancelled,
-	StatusModificationRequested,
 }
 
 // IsValidStatus checks if a status string is valid
@@ -55,15 +51,14 @@ type OrderData struct {
 
 // Order represents a customer order in the system
 type Order struct {
-	ID           string      `json:"id"`
-	ProfileID    *string     `json:"profile_id,omitempty"`
-	UserID       *string     `json:"user_id,omitempty"`
-	Status       OrderStatus `json:"status"`
-	StatusMessage *string    `json:"status_message,omitempty"`
-	ETA          string      `json:"eta"`
-	Data         *OrderData  `json:"data,omitempty"`
-	CreatedAt    time.Time   `json:"created_at"`
-	UpdatedAt    time.Time   `json:"updated_at"`
+	ID        string      `json:"id"`
+	ProfileID *string     `json:"profile_id,omitempty"`
+	UserID    *string     `json:"user_id,omitempty"`
+	Status    OrderStatus `json:"status"`
+	ETA       string      `json:"eta"`
+	Data      *OrderData  `json:"data,omitempty"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
 // DataJSON returns the Data field as JSON bytes for database storage
