@@ -42,6 +42,7 @@ type OrderItem struct {
 	Name     string  `json:"name"`
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
+	Weight   *int    `json:"weight,omitempty"` // weight in grams, optional
 }
 
 // OrderData represents the data/items in an order
@@ -51,14 +52,15 @@ type OrderData struct {
 
 // Order represents a customer order in the system
 type Order struct {
-	ID        string      `json:"id"`
-	ProfileID *string     `json:"profile_id,omitempty"`
-	UserID    *string     `json:"user_id,omitempty"`
-	Status    OrderStatus `json:"status"`
-	ETA       string      `json:"eta"`
-	Data      *OrderData  `json:"data,omitempty"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID            string      `json:"id"`
+	ProfileID     *string     `json:"profile_id,omitempty"`
+	UserID        *string     `json:"user_id,omitempty"`
+	Status        OrderStatus `json:"status"`
+	StatusMessage *string     `json:"status_message,omitempty"`
+	ETA           string      `json:"eta"`
+	Data          *OrderData  `json:"data,omitempty"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
 }
 
 // DataJSON returns the Data field as JSON bytes for database storage
