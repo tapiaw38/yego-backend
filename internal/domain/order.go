@@ -9,12 +9,14 @@ import (
 type OrderStatus string
 
 const (
-	StatusCreated   OrderStatus = "CREATED"
-	StatusConfirmed OrderStatus = "CONFIRMED"
-	StatusPreparing OrderStatus = "PREPARING"
-	StatusOnTheWay  OrderStatus = "ON_THE_WAY"
-	StatusDelivered OrderStatus = "DELIVERED"
-	StatusCancelled OrderStatus = "CANCELLED"
+	StatusCreated              OrderStatus = "CREATED"
+	StatusConfirmed            OrderStatus = "CONFIRMED"
+	StatusPreparing            OrderStatus = "PREPARING"
+	StatusOnTheWay             OrderStatus = "ON_THE_WAY"
+	StatusDelivered            OrderStatus = "DELIVERED"
+	StatusPaused               OrderStatus = "PAUSED"
+	StatusCancelled            OrderStatus = "CANCELLED"
+	StatusModificationRequested OrderStatus = "MODIFICATION_REQUESTED"
 )
 
 // ValidStatuses contains all valid order statuses in order
@@ -24,7 +26,9 @@ var ValidStatuses = []OrderStatus{
 	StatusPreparing,
 	StatusOnTheWay,
 	StatusDelivered,
+	StatusPaused,
 	StatusCancelled,
+	StatusModificationRequested,
 }
 
 // IsValidStatus checks if a status string is valid

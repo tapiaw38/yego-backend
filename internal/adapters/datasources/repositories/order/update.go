@@ -34,17 +34,22 @@ func (r *repository) UpdateStatus(ctx context.Context, id string, status domain.
 	return r.GetByID(ctx, id)
 }
 
-// Update updates an order (status, eta, etc.)
+// Update updates an order (status, eta, data, etc.)
 func (r *repository) Update(ctx context.Context, order *domain.Order) (*domain.Order, apperrors.ApplicationError) {
 	order.UpdatedAt = time.Now()
 
+	dataJSON, err := order.DataJSON()
+	if err != nil {
+		return nil, apperrors.NewApplicationError(mappings.OrderUpdateError, err)
+	}
+
 	query := `
 		UPDATE orders
-		SET status = $1, eta = $2, updated_at = $3
-		WHERE id = $4
+		SET status = $1, status_message = $2, eta = $3, data = $4, updated_at = $5
+		WHERE id = $6
 	`
 
-	result, err := r.db.ExecContext(ctx, query, order.Status, order.ETA, order.UpdatedAt, order.ID)
+	result, err := r.db.ExecContext(ctx, query, order.Status, order.StatusMessage, order.ETA, dataJSON, order.UpdatedAt, order.ID)
 	if err != nil {
 		return nil, apperrors.NewApplicationError(mappings.OrderUpdateError, err)
 	}
