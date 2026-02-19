@@ -22,6 +22,7 @@ type Order struct {
 	ClaimUsecase          order.ClaimUsecase
 	GetUsecase            order.GetUsecase
 	GetClaimInfoUsecase   order.GetClaimInfoUsecase
+	PayForOrderUsecase    order.PayForOrderUsecase
 	UpdateStatusUsecase   order.UpdateStatusUsecase
 	ListMyOrdersUsecase   order.ListMyOrdersUsecase
 }
@@ -67,6 +68,7 @@ func CreateUsecases(contextFactory appcontext.Factory) *Usecases {
 			ClaimUsecase:          order.NewClaimUsecase(contextFactory, notifier, settingsUsecases.CalculateDeliveryFeeUsecase),
 			GetUsecase:            order.NewGetUsecase(contextFactory),
 			GetClaimInfoUsecase:   order.NewGetClaimInfoUsecase(contextFactory),
+			PayForOrderUsecase:    order.NewPayForOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			UpdateStatusUsecase:   order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			ListMyOrdersUsecase:   order.NewListMyOrdersUsecase(contextFactory),
 		},

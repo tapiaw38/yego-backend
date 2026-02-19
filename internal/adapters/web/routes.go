@@ -32,6 +32,7 @@ func RegisterRoutes(app *gin.Engine, useCases *usecases.Usecases, frontendURL st
 		ordersAuth.POST("", orderHandler.NewCreateHandler(useCases.Order.CreateUsecase))
 		ordersAuth.PATCH("/:id/status", orderHandler.NewUpdateStatusHandler(useCases.Order.UpdateStatusUsecase))
 		ordersAuth.POST("/claim/:token", orderHandler.NewClaimHandler(useCases.Order.ClaimUsecase))
+		ordersAuth.POST("/:id/pay", orderHandler.NewPayForOrderHandler(useCases.Order.PayForOrderUsecase))
 		ordersAuth.GET("/my", orderHandler.NewListMyHandler(useCases.Order.ListMyOrdersUsecase))
 	}
 

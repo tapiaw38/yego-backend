@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 
 	"wappi/internal/adapters/web/integrations/payments"
 	"wappi/internal/domain"
@@ -49,6 +50,8 @@ func ProcessPaymentForOrder(ctx context.Context, app *appcontext.Context, order 
 	if orderTotal <= 0 {
 		return fmt.Errorf("order total is zero or negative")
 	}
+	// Round to 2 decimal places to avoid floating point issues with MercadoPago
+	orderTotal = math.Round(orderTotal*100) / 100
 
 	var userEmail string
 	if token != "" {
