@@ -13,12 +13,26 @@ type Integration interface {
 	HasPaymentMethod(userID string) (bool, error)
 	GetDefaultPaymentMethod(userID string) (*PaymentMethod, error)
 	ProcessPaymentWithSavedMethod(userID string, amount float64, description string, externalReference string, payerEmail string, collectorID string, securityCode string) (*ProcessPaymentResponse, error)
+	CreatePreference(items []PreferenceItem, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error)
 }
 
 type ProcessPaymentResponse struct {
 	PaymentID        int    `json:"id"`
 	GatewayPaymentID string `json:"gateway_payment_id"`
 	Status           string `json:"status"`
+}
+
+type PreferenceItem struct {
+	Title      string  `json:"title"`
+	Quantity   int     `json:"quantity"`
+	UnitPrice  float64 `json:"unit_price"`
+	CurrencyID string  `json:"currency_id"`
+}
+
+type PreferenceResponse struct {
+	PreferenceID    string `json:"preference_id"`
+	InitPoint       string `json:"init_point"`
+	SandboxInitPoint string `json:"sandbox_init_point"`
 }
 
 type integration struct {
@@ -127,6 +141,64 @@ func (i *integration) GetDefaultPaymentMethod(userID string) (*PaymentMethod, er
 	}
 
 	return &paymentMethod, nil
+}
+
+func (i *integration) CreatePreference(items []PreferenceItem, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/payments/preferences", i.baseURL)
+
+	type backURLsPayload struct {
+		Success string `json:"success"`
+		Failure string `json:"failure"`
+		Pending string `json:"pending"`
+	}
+	type preferencePayload struct {
+		Items             []PreferenceItem `json:"items"`
+		PayerEmail        string          `json:"payer_email"`
+		ExternalReference string          `json:"external_reference"`
+		BackURLs          backURLsPayload `json:"back_urls"`
+		NotificationURL   string          `json:"notification_url,omitempty"`
+	}
+
+	payload := preferencePayload{
+		Items:             items,
+		PayerEmail:        payerEmail,
+		ExternalReference: externalReference,
+		BackURLs: backURLsPayload{
+			Success: backURLSuccess,
+			Failure: backURLFailure,
+			Pending: backURLPending,
+		},
+		NotificationURL: notificationURL,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := i.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("payment service error: %s", string(body))
+	}
+
+	var prefResp PreferenceResponse
+	if err := json.NewDecoder(resp.Body).Decode(&prefResp); err != nil {
+		return nil, err
+	}
+
+	return &prefResp, nil
 }
 
 func (i *integration) ProcessPaymentWithSavedMethod(userID string, amount float64, description string, externalReference string, payerEmail string, collectorID string, securityCode string) (*ProcessPaymentResponse, error) {
