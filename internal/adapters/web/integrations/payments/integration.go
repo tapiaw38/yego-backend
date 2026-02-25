@@ -37,6 +37,7 @@ type PreferenceResponse struct {
 
 type integration struct {
 	baseURL string
+	apiKey  string
 	client  *http.Client
 }
 
@@ -57,15 +58,28 @@ func NewIntegration(cfg *config.ConfigurationService) Integration {
 
 	return &integration{
 		baseURL: baseURL,
+		apiKey:  cfg.PaymentAPIKey,
 		client:  &http.Client{},
 	}
+}
+
+func (i *integration) newRequest(method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if i.apiKey != "" {
+		req.Header.Set("X-API-Key", i.apiKey)
+	}
+	return req, nil
 }
 
 func (i *integration) HasPaymentMethod(userID string) (bool, error) {
 	// First try to get default payment method
 	url := fmt.Sprintf("%s/api/v1/payment-methods/user/%s/default", i.baseURL, userID)
-	
-	req, err := http.NewRequest("GET", url, nil)
+
+	req, err := i.newRequest("GET", url, nil)
 	if err != nil {
 		return false, err
 	}
@@ -87,7 +101,7 @@ func (i *integration) HasPaymentMethod(userID string) (bool, error) {
 	// If no default, check if user has any payment methods
 	if resp.StatusCode == http.StatusNotFound {
 		allMethodsURL := fmt.Sprintf("%s/api/v1/payment-methods/user/%s", i.baseURL, userID)
-		req2, err := http.NewRequest("GET", allMethodsURL, nil)
+		req2, err := i.newRequest("GET", allMethodsURL, nil)
 		if err != nil {
 			return false, err
 		}
@@ -114,8 +128,8 @@ func (i *integration) HasPaymentMethod(userID string) (bool, error) {
 
 func (i *integration) GetDefaultPaymentMethod(userID string) (*PaymentMethod, error) {
 	url := fmt.Sprintf("%s/api/v1/payment-methods/user/%s/default", i.baseURL, userID)
-	
-	req, err := http.NewRequest("GET", url, nil)
+
+	req, err := i.newRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -176,11 +190,10 @@ func (i *integration) CreatePreference(items []PreferenceItem, payerEmail string
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req, err := i.newRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := i.client.Do(req)
 	if err != nil {
@@ -235,11 +248,10 @@ func (i *integration) ProcessPaymentWithSavedMethod(userID string, amount float6
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req, err := i.newRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := i.client.Do(req)
 	if err != nil {

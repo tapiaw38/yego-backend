@@ -16,10 +16,11 @@ import (
 
 // CreatePaymentLinkInput represents the input for creating a payment link
 type CreatePaymentLinkInput struct {
-	OrderID    string
-	UserID     string
-	AuthToken  string
+	OrderID     string
+	UserID      string
+	AuthToken   string
 	FrontendURL string
+	BackendURL  string
 }
 
 // CreatePaymentLinkOutput represents the output with the payment link
@@ -160,6 +161,11 @@ func (u *createPaymentLinkUsecase) Execute(ctx context.Context, input CreatePaym
 	}
 	orderURL := fmt.Sprintf("%s/order/%s", frontendURL, order.ID)
 
+	notificationURL := ""
+	if input.BackendURL != "" {
+		notificationURL = fmt.Sprintf("%s/api/orders/webhook/mp", input.BackendURL)
+	}
+
 	prefResp, prefErr := app.Integrations.Payments.CreatePreference(
 		prefItems,
 		payerEmail,
@@ -167,7 +173,7 @@ func (u *createPaymentLinkUsecase) Execute(ctx context.Context, input CreatePaym
 		orderURL,
 		orderURL,
 		orderURL,
-		"",
+		notificationURL,
 	)
 	if prefErr != nil {
 		return nil, apperrors.NewApplicationError(mappings.OrderPaymentFailedError, fmt.Errorf("failed to create preference: %w", prefErr))

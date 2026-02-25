@@ -12,7 +12,7 @@ import (
 )
 
 // NewCreatePaymentLinkHandler creates a handler for generating a MercadoPago Checkout Pro payment link
-func NewCreatePaymentLinkHandler(usecase orderUsecase.CreatePaymentLinkUsecase, frontendURL string) gin.HandlerFunc {
+func NewCreatePaymentLinkHandler(usecase orderUsecase.CreatePaymentLinkUsecase, frontendURL string, backendURL string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		orderID := c.Param("id")
 		if orderID == "" {
@@ -41,6 +41,7 @@ func NewCreatePaymentLinkHandler(usecase orderUsecase.CreatePaymentLinkUsecase, 
 			UserID:      userID,
 			AuthToken:   authToken,
 			FrontendURL: frontendURL,
+			BackendURL:  backendURL,
 		})
 		if appErr != nil {
 			appErr.Log(c)

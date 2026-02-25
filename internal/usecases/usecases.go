@@ -17,15 +17,16 @@ type Usecases struct {
 }
 
 type Order struct {
-	CreateUsecase            order.CreateUsecase
-	CreateWithLinkUsecase    order.CreateWithLinkUsecase
-	ClaimUsecase             order.ClaimUsecase
-	GetUsecase               order.GetUsecase
-	GetClaimInfoUsecase      order.GetClaimInfoUsecase
-	PayForOrderUsecase       order.PayForOrderUsecase
-	CreatePaymentLinkUsecase order.CreatePaymentLinkUsecase
-	UpdateStatusUsecase      order.UpdateStatusUsecase
-	ListMyOrdersUsecase      order.ListMyOrdersUsecase
+	CreateUsecase               order.CreateUsecase
+	CreateWithLinkUsecase       order.CreateWithLinkUsecase
+	ClaimUsecase                order.ClaimUsecase
+	GetUsecase                  order.GetUsecase
+	GetClaimInfoUsecase         order.GetClaimInfoUsecase
+	PayForOrderUsecase          order.PayForOrderUsecase
+	CreatePaymentLinkUsecase    order.CreatePaymentLinkUsecase
+	HandlePaymentWebhookUsecase order.HandlePaymentWebhookUsecase
+	UpdateStatusUsecase         order.UpdateStatusUsecase
+	ListMyOrdersUsecase         order.ListMyOrdersUsecase
 }
 
 type Profile struct {
@@ -64,15 +65,16 @@ func CreateUsecases(contextFactory appcontext.Factory) *Usecases {
 
 	return &Usecases{
 		Order: Order{
-			CreateUsecase:            order.NewCreateUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
-			CreateWithLinkUsecase:    order.NewCreateWithLinkUsecase(contextFactory),
-			ClaimUsecase:             order.NewClaimUsecase(contextFactory, notifier, settingsUsecases.CalculateDeliveryFeeUsecase),
-			GetUsecase:               order.NewGetUsecase(contextFactory),
-			GetClaimInfoUsecase:      order.NewGetClaimInfoUsecase(contextFactory),
-			PayForOrderUsecase:       order.NewPayForOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
-			CreatePaymentLinkUsecase: order.NewCreatePaymentLinkUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
-			UpdateStatusUsecase:      order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
-			ListMyOrdersUsecase:      order.NewListMyOrdersUsecase(contextFactory),
+			CreateUsecase:               order.NewCreateUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			CreateWithLinkUsecase:       order.NewCreateWithLinkUsecase(contextFactory),
+			ClaimUsecase:                order.NewClaimUsecase(contextFactory, notifier, settingsUsecases.CalculateDeliveryFeeUsecase),
+			GetUsecase:                  order.NewGetUsecase(contextFactory),
+			GetClaimInfoUsecase:         order.NewGetClaimInfoUsecase(contextFactory),
+			PayForOrderUsecase:          order.NewPayForOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			CreatePaymentLinkUsecase:    order.NewCreatePaymentLinkUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			HandlePaymentWebhookUsecase: order.NewHandlePaymentWebhookUsecase(contextFactory),
+			UpdateStatusUsecase:         order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			ListMyOrdersUsecase:         order.NewListMyOrdersUsecase(contextFactory),
 		},
 		Profile: Profile{
 			GenerateLinkUsecase:    profile.NewGenerateLinkUsecase(contextFactory),

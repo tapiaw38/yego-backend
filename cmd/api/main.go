@@ -5,6 +5,7 @@ import (
 
 	"yego/internal/adapters/datasources"
 	"yego/internal/adapters/web"
+	paymentHandler "yego/internal/adapters/web/handlers/payment"
 	websocketHandler "yego/internal/adapters/web/handlers/websocket"
 	"yego/internal/adapters/web/integrations"
 	"yego/internal/adapters/web/middlewares"
@@ -39,7 +40,8 @@ func main() {
 
 	hub := integrations.WebSocket.GetHub()
 	wsHandler := websocketHandler.NewHandler(hub)
-	web.RegisterRoutes(app, useCases, cfg.FrontendURL, wsHandler, contextFactory)
+	paymentCheckHandler := paymentHandler.NewHandler(contextFactory)
+	web.RegisterRoutes(app, useCases, wsHandler, paymentCheckHandler, cfg)
 
 	app.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
