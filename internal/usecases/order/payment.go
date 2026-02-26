@@ -93,8 +93,12 @@ func ProcessPaymentForOrder(ctx context.Context, app *appcontext.Context, order 
 		return fmt.Errorf("failed to process payment: %w", paymentErr)
 	}
 
-	log.Printf("Payment processed successfully for order %s: Payment ID %d, Gateway ID %s, Status %s",
+	log.Printf("Payment processed for order %s: Payment ID %d, Gateway ID %s, Status %s",
 		order.ID, paymentResponse.PaymentID, paymentResponse.GatewayPaymentID, paymentResponse.Status)
+
+	if paymentResponse.Status == "rejected" {
+		return fmt.Errorf("payment rejected by gateway (status: %s)", paymentResponse.Status)
+	}
 
 	description := fmt.Sprintf("Pago por pedido %s", order.ID)
 	transaction := &domain.Transaction{
