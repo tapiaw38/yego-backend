@@ -62,7 +62,7 @@ func importName(data map[string]any) string {
 	return val
 }
 
-// importPrice extracts the unit price from an import record and rounds to nearest integer.
+// importPrice extracts the unit price from an import record, rounded to 2 decimal places.
 func importPrice(data map[string]any) (float64, bool) {
 	val, ok := findColValue(data, []string{"precio unitario", "precio", "price", "costo", "valor", "importe"})
 	if !ok {
@@ -77,7 +77,7 @@ func importPrice(data map[string]any) (float64, bool) {
 		log.Printf("[PriceValidator] price parse error: %v (cleaned=%q)", err, cleaned)
 		return 0, false
 	}
-	return math.Round(price), true
+	return math.Round(price*100) / 100, true
 }
 
 func mapKeys(m map[string]any) []string {
@@ -129,6 +129,11 @@ func correctItemPrices(items []domain.OrderItem, records []*domain.ImportRecord)
 	for i, item := range items {
 		corrected[i] = item
 		log.Printf("[PriceValidator] item[%d] code=%q name=%q price=%.2f", i, item.Code, item.Name, item.Price)
+
+		if item.Code == "" && item.Name == "" {
+			log.Printf("[PriceValidator] item[%d] WARNING: no code and no name, skipping", i)
+			continue
+		}
 
 		var matched *domain.ImportRecord
 		if item.Code != "" {
