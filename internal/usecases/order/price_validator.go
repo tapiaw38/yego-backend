@@ -69,15 +69,18 @@ func importPrice(data map[string]any) (float64, bool) {
 		log.Printf("[PriceValidator] price column not found in data keys: %v", mapKeys(data))
 		return 0, false
 	}
-	log.Printf("[PriceValidator] price raw value=%q", val)
+	log.Printf("[PriceValidator] price raw value=%q (hex: % x)", val, []byte(val))
 	cleaned := strings.NewReplacer("$", "", " ", "", "\u00a0", "").Replace(val)
 	cleaned = strings.ReplaceAll(cleaned, ",", ".")
+	log.Printf("[PriceValidator] price cleaned=%q", cleaned)
 	price, err := strconv.ParseFloat(cleaned, 64)
 	if err != nil {
 		log.Printf("[PriceValidator] price parse error: %v (cleaned=%q)", err, cleaned)
 		return 0, false
 	}
-	return math.Round(price*100) / 100, true
+	rounded := math.Round(price*100) / 100
+	log.Printf("[PriceValidator] price parsed=%.4f rounded=%.4f", price, rounded)
+	return rounded, true
 }
 
 func mapKeys(m map[string]any) []string {
@@ -156,10 +159,13 @@ func correctItemPrices(items []domain.OrderItem, records []*domain.ImportRecord)
 			corrected[i].Name = name
 			hasChanges = true
 		}
-		if price, ok := importPrice(matched.Data); ok && price != item.Price {
-			log.Printf("[PriceValidator] item[%d] correcting price: %.2f → %.2f", i, item.Price, price)
-			corrected[i].Price = price
-			hasChanges = true
+		if price, ok := importPrice(matched.Data); ok {
+			log.Printf("[PriceValidator] item[%d] import price=%.4f item price=%.4f equal=%v", i, price, item.Price, price == item.Price)
+			if price != item.Price {
+				log.Printf("[PriceValidator] item[%d] correcting price: %.4f → %.4f", i, item.Price, price)
+				corrected[i].Price = price
+				hasChanges = true
+			}
 		}
 	}
 	log.Printf("[PriceValidator] hasChanges=%v", hasChanges)
