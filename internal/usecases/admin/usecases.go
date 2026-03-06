@@ -19,6 +19,7 @@ type Usecases struct {
 	DeleteImport     DeleteImportUsecase
 	ClearImports     ClearImportsUsecase
 	PresignUpload    PresignUploadUsecase
+	DeleteUpload     DeleteUploadUsecase
 }
 
 // NewUsecases creates all admin use cases
@@ -35,5 +36,6 @@ func NewUsecases(contextFactory appcontext.Factory, calculateDeliveryFeeUse sett
 		DeleteImport:     NewDeleteImportUsecase(contextFactory),
 		ClearImports:     NewClearImportsUsecase(contextFactory),
 		PresignUpload:    NewPresignUploadUsecase(s3Client),
+		DeleteUpload:     NewDeleteUploadUsecase(s3Client),
 	}
 }

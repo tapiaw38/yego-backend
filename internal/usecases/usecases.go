@@ -52,6 +52,7 @@ type Admin struct {
 	DeleteImport            admin.DeleteImportUsecase
 	ClearImports            admin.ClearImportsUsecase
 	PresignUpload           admin.PresignUploadUsecase
+	DeleteUpload            admin.DeleteUploadUsecase
 }
 
 type Settings struct {
@@ -105,6 +106,7 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 			DeleteImport:            admin.NewDeleteImportUsecase(contextFactory),
 			ClearImports:            admin.NewClearImportsUsecase(contextFactory),
 			PresignUpload:           admin.NewPresignUploadUsecase(s3Client),
+			DeleteUpload:            admin.NewDeleteUploadUsecase(s3Client),
 		},
 		Settings: settingsUsecases,
 	}
