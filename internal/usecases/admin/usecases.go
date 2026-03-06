@@ -1,6 +1,7 @@
 package admin
 
 import (
+	s3service "yego/internal/services/s3"
 	"yego/internal/platform/appcontext"
 	settingsUsecase "yego/internal/usecases/settings"
 )
@@ -17,10 +18,11 @@ type Usecases struct {
 	UpdateImport     UpdateImportUsecase
 	DeleteImport     DeleteImportUsecase
 	ClearImports     ClearImportsUsecase
+	PresignUpload    PresignUploadUsecase
 }
 
 // NewUsecases creates all admin use cases
-func NewUsecases(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase) *Usecases {
+func NewUsecases(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase, s3Client *s3service.Client) *Usecases {
 	return &Usecases{
 		ListProfiles:     NewListProfilesUsecase(contextFactory),
 		ListOrders:       NewListOrdersUsecase(contextFactory),
@@ -32,5 +34,6 @@ func NewUsecases(contextFactory appcontext.Factory, calculateDeliveryFeeUse sett
 		UpdateImport:     NewUpdateImportUsecase(contextFactory),
 		DeleteImport:     NewDeleteImportUsecase(contextFactory),
 		ClearImports:     NewClearImportsUsecase(contextFactory),
+		PresignUpload:    NewPresignUploadUsecase(s3Client),
 	}
 }

@@ -19,6 +19,10 @@ type ConfigurationService struct {
 	AuthAPIURL              string
 	MPAccessToken            string
 	MPCheckoutProAccessToken string
+	S3Region                string
+	S3Bucket                string
+	S3AccessKeyID           string
+	S3SecretAccessKey       string
 }
 
 var instance *ConfigurationService
@@ -40,6 +44,10 @@ func GetInstance() *ConfigurationService {
 			AuthAPIURL:               getEnvOrDefault("AUTH_API_URL", "http://localhost:8082"),
 			MPAccessToken:            getEnvOrDefault("MP_ACCESS_TOKEN", ""),
 			MPCheckoutProAccessToken: getEnvOrDefault("MP_CHECKOUT_PRO_ACCESS_TOKEN", ""),
+			S3Region:                 getEnvOrDefault("AWS_REGION", ""),
+			S3Bucket:                 getEnvOrDefault("AWS_BUCKET", ""),
+			S3AccessKeyID:            getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),
+			S3SecretAccessKey:        getEnvOrDefault("AWS_SECRET_ACCESS_KEY", ""),
 		}
 	}
 	return instance

@@ -83,7 +83,7 @@ func (u *handlePaymentWebhookUsecase) Execute(ctx context.Context, resourceID st
 	}
 
 	if info.orderID == "" {
-		log.Printf("Webhook: no external_reference found for %s/%s, skipping", topic, resourceID)
+		log.Printf("Webhook: %s/%s has no approved payment yet, skipping", topic, resourceID)
 		return nil
 	}
 
@@ -152,7 +152,10 @@ func (u *handlePaymentWebhookUsecase) getMerchantOrderInfo(orderID string, token
 	if err := json.Unmarshal(body, &mo); err != nil {
 		return nil, err
 	}
-	log.Printf("Webhook: merchant_order %s status=%s external_reference=%s", orderID, mo.Status, mo.ExternalReference)
+	log.Printf("Webhook: merchant_order %s status=%s external_reference=%s payments_count=%d", orderID, mo.Status, mo.ExternalReference, len(mo.Payments))
+	for i, p := range mo.Payments {
+		log.Printf("Webhook: merchant_order %s payment[%d] id=%d status=%s amount=%.2f", orderID, i, p.ID, p.Status, p.Amount)
+	}
 
 	var approvedPaymentID string
 	var approvedAmount float64
@@ -164,6 +167,7 @@ func (u *handlePaymentWebhookUsecase) getMerchantOrderInfo(orderID string, token
 		}
 	}
 	if approvedPaymentID == "" && mo.Status != "closed" {
+		log.Printf("Webhook: merchant_order %s skipping — no approved payment and status=%s", orderID, mo.Status)
 		return &mpPaymentResult{}, nil
 	}
 	amount := approvedAmount

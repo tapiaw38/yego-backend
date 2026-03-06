@@ -79,6 +79,7 @@ func RegisterRoutes(app *gin.Engine, useCases *usecases.Usecases, wsHandler *web
 		admin.PUT("/imports/:id", adminHandler.NewUpdateImportHandler(useCases.Admin.UpdateImport))
 		admin.DELETE("/imports/:id", adminHandler.NewDeleteImportHandler(useCases.Admin.DeleteImport))
 		admin.DELETE("/imports", adminHandler.NewClearImportsHandler(useCases.Admin.ClearImports))
+		admin.POST("/uploads/presign", adminHandler.NewPresignUploadHandler(useCases.Admin.PresignUpload))
 	}
 
 	// Payment routes (require auth)

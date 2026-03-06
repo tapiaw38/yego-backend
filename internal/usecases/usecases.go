@@ -3,6 +3,7 @@ package usecases
 import (
 	"yego/internal/adapters/web/websocket"
 	"yego/internal/platform/appcontext"
+	s3service "yego/internal/services/s3"
 	"yego/internal/usecases/admin"
 	"yego/internal/usecases/order"
 	"yego/internal/usecases/profile"
@@ -50,6 +51,7 @@ type Admin struct {
 	UpdateImport            admin.UpdateImportUsecase
 	DeleteImport            admin.DeleteImportUsecase
 	ClearImports            admin.ClearImportsUsecase
+	PresignUpload           admin.PresignUploadUsecase
 }
 
 type Settings struct {
@@ -58,7 +60,7 @@ type Settings struct {
 	CalculateDeliveryFeeUsecase settings.CalculateDeliveryFeeUsecase
 }
 
-func CreateUsecases(contextFactory appcontext.Factory) *Usecases {
+func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Client) *Usecases {
 	app := contextFactory()
 	hub := app.Integrations.WebSocket.GetHub()
 	notifier := websocket.NewNotifier(hub)
@@ -102,6 +104,7 @@ func CreateUsecases(contextFactory appcontext.Factory) *Usecases {
 			UpdateImport:            admin.NewUpdateImportUsecase(contextFactory),
 			DeleteImport:            admin.NewDeleteImportUsecase(contextFactory),
 			ClearImports:            admin.NewClearImportsUsecase(contextFactory),
+			PresignUpload:           admin.NewPresignUploadUsecase(s3Client),
 		},
 		Settings: settingsUsecases,
 	}

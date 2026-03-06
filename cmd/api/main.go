@@ -12,6 +12,7 @@ import (
 	"yego/internal/platform/appcontext"
 	"yego/internal/platform/config"
 	"yego/internal/platform/database"
+	s3service "yego/internal/services/s3"
 	"yego/internal/usecases"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +32,8 @@ func main() {
 	integrations := integrations.CreateIntegration(cfg)
 	contextFactory := appcontext.NewFactory(ds, integrations, cfg)
 
-	useCases := usecases.CreateUsecases(contextFactory)
+	s3Client := s3service.NewClient(cfg.S3Region, cfg.S3Bucket, cfg.S3AccessKeyID, cfg.S3SecretAccessKey)
+	useCases := usecases.CreateUsecases(contextFactory, s3Client)
 
 	gin.SetMode(cfg.GinMode)
 	app := gin.Default()
