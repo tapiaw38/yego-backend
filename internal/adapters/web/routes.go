@@ -37,6 +37,8 @@ func RegisterRoutes(app *gin.Engine, useCases *usecases.Usecases, wsHandler *web
 		ordersAuth.POST("/:id/pay", orderHandler.NewPayForOrderHandler(useCases.Order.PayForOrderUsecase))
 		ordersAuth.POST("/:id/payment-link", orderHandler.NewCreatePaymentLinkHandler(useCases.Order.CreatePaymentLinkUsecase, cfg.FrontendURL, cfg.BackendURL))
 		ordersAuth.GET("/my", orderHandler.NewListMyHandler(useCases.Order.ListMyOrdersUsecase))
+		ordersAuth.GET("/delivery", orderHandler.NewListDeliveryHandler(useCases.Order.ListDeliveryOrdersUsecase))
+		ordersAuth.POST("/:id/accept-delivery", orderHandler.NewAcceptDeliveryHandler(useCases.Order.AcceptDeliveryUsecase))
 	}
 
 	// Public profile routes (token-based access)
@@ -73,6 +75,7 @@ func RegisterRoutes(app *gin.Engine, useCases *usecases.Usecases, wsHandler *web
 		admin.GET("/orders", adminHandler.NewListOrdersHandler(useCases.Admin.ListOrdersUsecase))
 		admin.GET("/transactions", adminHandler.NewListTransactionsHandler(useCases.Admin.ListTransactionsUsecase))
 		admin.PUT("/orders/:id", adminHandler.NewUpdateOrderHandler(useCases.Admin.UpdateOrderUsecase))
+		admin.POST("/orders/:id/assign-delivery", adminHandler.NewAssignDeliveryHandler(useCases.Admin.AssignDeliveryUsecase))
 		admin.POST("/import", adminHandler.NewUploadImportHandler(useCases.Admin.UploadImport))
 		admin.GET("/imports", adminHandler.NewListImportsHandler(useCases.Admin.ListImports))
 		admin.POST("/imports", adminHandler.NewCreateImportHandler(useCases.Admin.CreateImport))

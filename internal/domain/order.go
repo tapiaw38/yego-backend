@@ -57,15 +57,17 @@ type OrderData struct {
 
 // Order represents a customer order in the system
 type Order struct {
-	ID            string      `json:"id"`
-	ProfileID     *string     `json:"profile_id,omitempty"`
-	UserID        *string     `json:"user_id,omitempty"`
-	Status        OrderStatus `json:"status"`
-	StatusMessage *string     `json:"status_message,omitempty"`
-	ETA           string      `json:"eta"`
-	Data          *OrderData  `json:"data,omitempty"`
-	CreatedAt     time.Time   `json:"created_at"`
-	UpdatedAt     time.Time   `json:"updated_at"`
+	ID                 string     `json:"id"`
+	ProfileID          *string    `json:"profile_id,omitempty"`
+	UserID             *string    `json:"user_id,omitempty"`
+	Status             OrderStatus `json:"status"`
+	StatusMessage      *string    `json:"status_message,omitempty"`
+	ETA                string     `json:"eta"`
+	Data               *OrderData `json:"data,omitempty"`
+	DeliveryUserID     *string    `json:"delivery_user_id,omitempty"`
+	DeliveryAcceptedAt *time.Time `json:"delivery_accepted_at,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 }
 
 // DataJSON returns the Data field as JSON bytes for database storage

@@ -7,6 +7,7 @@ import (
 	"yego/internal/platform/appcontext"
 	apperrors "yego/internal/platform/errors"
 	"yego/internal/platform/errors/mappings"
+	"yego/internal/usecases/notification"
 	settingsUsecase "yego/internal/usecases/settings"
 
 	"github.com/google/uuid"
@@ -31,13 +32,15 @@ type UpdateStatusUsecase interface {
 type updateStatusUsecase struct {
 	contextFactory          appcontext.Factory
 	calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase
+	notificationSvc         notification.Service
 }
 
 // NewUpdateStatusUsecase creates a new instance of UpdateStatusUsecase
-func NewUpdateStatusUsecase(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase) UpdateStatusUsecase {
+func NewUpdateStatusUsecase(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase, notificationSvc notification.Service) UpdateStatusUsecase {
 	return &updateStatusUsecase{
 		contextFactory:          contextFactory,
 		calculateDeliveryFeeUse: calculateDeliveryFeeUse,
+		notificationSvc:         notificationSvc,
 	}
 }
 
@@ -58,8 +61,19 @@ func (u *updateStatusUsecase) Execute(ctx context.Context, id string, input Upda
 		return nil, err
 	}
 
-	// Payment processing removed - payments are now processed at order creation
-	// Keeping this comment for reference
+	// Notify the assigned delivery user about the status change
+	if updated.DeliveryUserID != nil && *updated.DeliveryUserID != "" {
+		statusMsg := ""
+		if updated.StatusMessage != nil {
+			statusMsg = *updated.StatusMessage
+		}
+		_ = u.notificationSvc.NotifyDeliveryUserOrderUpdated(*updated.DeliveryUserID, notification.OrderStatusUpdatedPayload{
+			OrderID:       updated.ID,
+			Status:        string(updated.Status),
+			StatusMessage: statusMsg,
+			ETA:           updated.ETA,
+		})
+	}
 
 	return &UpdateStatusOutput{
 		Data: toOrderOutputData(updated, false),

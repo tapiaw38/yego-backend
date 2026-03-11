@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -43,6 +44,7 @@ func (h *Handler) HandleWebSocket(c *gin.Context) {
 	}
 
 	userID := claims.UserID
+	role := c.Query("role") // "manager" | "delivery" — sent by frontend
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -51,10 +53,12 @@ func (h *Handler) HandleWebSocket(c *gin.Context) {
 	}
 
 	client := &ws.Client{
-		Hub:       h.hub,
-		Conn:      conn,
-		Send:      make(chan []byte, 256),
-		IsManager: true,
+		Hub:        h.hub,
+		Conn:       conn,
+		Send:       make(chan []byte, 256),
+		IsManager:  role != "delivery",
+		IsDelivery: role == "delivery",
+		UserID:     userID,
 	}
 
 	h.hub.Register <- client
@@ -62,7 +66,7 @@ func (h *Handler) HandleWebSocket(c *gin.Context) {
 	go clientWritePump(client)
 	go clientReadPump(h.hub, client, userID)
 
-	log.Printf("WebSocket connection established for user: %s", userID)
+	log.Printf("WebSocket connected: user=%s role=%s", userID, role)
 }
 
 func clientWritePump(client *ws.Client) {
@@ -93,6 +97,17 @@ func clientWritePump(client *ws.Client) {
 	}
 }
 
+type incomingMessage struct {
+	Type    string          `json:"type"`
+	Payload json.RawMessage `json:"payload"`
+}
+
+type locationUpdatePayload struct {
+	OrderID   string  `json:"order_id"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
 func clientReadPump(hub *ws.Hub, client *ws.Client, userID string) {
 	defer func() {
 		hub.Unregister <- client
@@ -100,18 +115,49 @@ func clientReadPump(hub *ws.Hub, client *ws.Client, userID string) {
 		log.Printf("WebSocket connection closed for user: %s", userID)
 	}()
 
-	client.Conn.SetReadLimit(512)
+	client.Conn.SetReadLimit(4096)
 	client.Conn.SetPongHandler(func(string) error {
 		return nil
 	})
 
 	for {
-		_, _, err := client.Conn.ReadMessage()
+		_, data, err := client.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("WebSocket read error: %v", err)
 			}
 			break
+		}
+
+		if !client.IsDelivery {
+			continue
+		}
+
+		var msg incomingMessage
+		if err := json.Unmarshal(data, &msg); err != nil {
+			log.Printf("WebSocket: failed to parse message from %s: %v", userID, err)
+			continue
+		}
+
+		switch msg.Type {
+		case "location_update":
+			var loc locationUpdatePayload
+			if err := json.Unmarshal(msg.Payload, &loc); err != nil {
+				log.Printf("WebSocket: invalid location_update payload: %v", err)
+				continue
+			}
+			if err := hub.NotifyManagers(ws.Notification{
+				Type: ws.DeliveryLocationUpdatedNotification,
+				Payload: ws.DeliveryLocationPayload{
+					OrderID:   loc.OrderID,
+					UserID:    userID,
+					Latitude:  loc.Latitude,
+					Longitude: loc.Longitude,
+					Timestamp: time.Now().UTC().Format(time.RFC3339),
+				},
+			}); err != nil {
+				log.Printf("WebSocket: failed to broadcast location: %v", err)
+			}
 		}
 	}
 }

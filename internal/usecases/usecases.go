@@ -28,6 +28,8 @@ type Order struct {
 	HandlePaymentWebhookUsecase order.HandlePaymentWebhookUsecase
 	UpdateStatusUsecase         order.UpdateStatusUsecase
 	ListMyOrdersUsecase         order.ListMyOrdersUsecase
+	ListDeliveryOrdersUsecase   order.ListDeliveryOrdersUsecase
+	AcceptDeliveryUsecase       order.AcceptDeliveryUsecase
 }
 
 type Profile struct {
@@ -45,6 +47,7 @@ type Admin struct {
 	ListOrdersUsecase       admin.ListOrdersUsecase
 	ListTransactionsUsecase admin.ListTransactionsUsecase
 	UpdateOrderUsecase      admin.UpdateOrderUsecase
+	AssignDeliveryUsecase   admin.AssignDeliveryUsecase
 	UploadImport            admin.UploadImportUsecase
 	ListImports             admin.ListImportsUsecase
 	CreateImport            admin.CreateImportUsecase
@@ -82,8 +85,10 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 			PayForOrderUsecase:          order.NewPayForOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			CreatePaymentLinkUsecase:    order.NewCreatePaymentLinkUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			HandlePaymentWebhookUsecase: order.NewHandlePaymentWebhookUsecase(contextFactory),
-			UpdateStatusUsecase:         order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			UpdateStatusUsecase:         order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase, notifier),
 			ListMyOrdersUsecase:         order.NewListMyOrdersUsecase(contextFactory),
+			ListDeliveryOrdersUsecase:   order.NewListDeliveryOrdersUsecase(contextFactory),
+			AcceptDeliveryUsecase:       order.NewAcceptDeliveryUsecase(contextFactory, notifier),
 		},
 		Profile: Profile{
 			GenerateLinkUsecase:    profile.NewGenerateLinkUsecase(contextFactory),
@@ -99,6 +104,7 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 			ListOrdersUsecase:       admin.NewListOrdersUsecase(contextFactory),
 			ListTransactionsUsecase: admin.NewListTransactionsUsecase(contextFactory),
 			UpdateOrderUsecase:      admin.NewUpdateOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			AssignDeliveryUsecase:   admin.NewAssignDeliveryUsecase(contextFactory, notifier),
 			UploadImport:            admin.NewUploadImportUsecase(contextFactory),
 			ListImports:             admin.NewListImportsUsecase(contextFactory),
 			CreateImport:            admin.NewCreateImportUsecase(contextFactory),
