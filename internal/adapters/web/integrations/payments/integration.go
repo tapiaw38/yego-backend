@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 	"yego/internal/platform/config"
 )
 
@@ -59,7 +60,7 @@ func NewIntegration(cfg *config.ConfigurationService) Integration {
 	return &integration{
 		baseURL: baseURL,
 		apiKey:  cfg.PaymentAPIKey,
-		client:  &http.Client{},
+		client:  &http.Client{Timeout: 60 * time.Second},
 	}
 }
 
