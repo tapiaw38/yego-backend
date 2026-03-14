@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"yego/internal/domain"
 	"yego/internal/platform/appcontext"
 	apperrors "yego/internal/platform/errors"
 	"yego/internal/platform/errors/mappings"
+	"yego/internal/usecases/notification"
 	settingsUsecase "yego/internal/usecases/settings"
 )
 
@@ -33,13 +35,15 @@ type CreateUsecase interface {
 type createUsecase struct {
 	contextFactory          appcontext.Factory
 	calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase
+	notificationSvc         notification.Service
 }
 
 // NewCreateUsecase creates a new instance of CreateUsecase
-func NewCreateUsecase(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase) CreateUsecase {
+func NewCreateUsecase(contextFactory appcontext.Factory, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase, notificationSvc notification.Service) CreateUsecase {
 	return &createUsecase{
 		contextFactory:          contextFactory,
 		calculateDeliveryFeeUse: calculateDeliveryFeeUse,
+		notificationSvc:         notificationSvc,
 	}
 }
 
@@ -63,12 +67,30 @@ func (u *createUsecase) Execute(ctx context.Context, input CreateInput) (*Create
 		paymentErr := ProcessPaymentForOrder(ctx, app, created, input.Token, input.SecurityCode, u.calculateDeliveryFeeUse)
 		if paymentErr != nil {
 			log.Printf("Payment failed for order %s: %v", created.ID, paymentErr)
-			// Keep status as CREATED but return error
 			return nil, apperrors.NewApplicationError(mappings.OrderPaymentFailedError, fmt.Errorf("payment failed: %w", paymentErr))
 		}
-		// Payment successful - update status to CONFIRMED
 		created.Status = domain.StatusConfirmed
 		created, _ = app.Repositories.Order.Update(ctx, created)
+	}
+
+	// Notify managers of the new order
+	if u.notificationSvc != nil {
+		profileID := ""
+		if created.ProfileID != nil {
+			profileID = *created.ProfileID
+		}
+		payload := notification.OrderCreatedPayload{
+			OrderID:   created.ID,
+			ProfileID: profileID,
+			Status:    string(created.Status),
+			ETA:       created.ETA,
+			CreatedAt: time.Now().Format("2006-01-02T15:04:05Z"),
+		}
+		go func() {
+			if notifyErr := u.notificationSvc.NotifyOrderCreated(payload); notifyErr != nil {
+				log.Printf("Warning: failed to notify order created %s: %v", created.ID, notifyErr)
+			}
+		}()
 	}
 
 	return &CreateOutput{

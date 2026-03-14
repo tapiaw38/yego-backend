@@ -4,6 +4,54 @@ import (
 	"yego/internal/domain"
 )
 
+// CouponOutput represents a coupon in the admin API response
+type CouponOutput struct {
+	ID                string   `json:"id"`
+	Code              string   `json:"code"`
+	Description       *string  `json:"description,omitempty"`
+	DiscountType      string   `json:"discount_type"`
+	DiscountValue     float64  `json:"discount_value"`
+	MaxUses           *int     `json:"max_uses,omitempty"`
+	CurrentUses       int      `json:"current_uses"`
+	UsageLimitPerUser int      `json:"usage_limit_per_user"`
+	MinOrderAmount    *float64 `json:"min_order_amount,omitempty"`
+	ValidFrom         *string  `json:"valid_from,omitempty"`
+	ValidUntil        *string  `json:"valid_until,omitempty"`
+	Active            bool     `json:"active"`
+	IconURL           *string  `json:"icon_url,omitempty"`
+	CoverURL          *string  `json:"cover_url,omitempty"`
+	CreatedAt         string   `json:"created_at"`
+	UpdatedAt         string   `json:"updated_at"`
+}
+
+func toCouponOutput(c *domain.Coupon) *CouponOutput {
+	out := &CouponOutput{
+		ID:                c.ID,
+		Code:              c.Code,
+		Description:       c.Description,
+		DiscountType:      string(c.DiscountType),
+		DiscountValue:     c.DiscountValue,
+		MaxUses:           c.MaxUses,
+		CurrentUses:       c.CurrentUses,
+		UsageLimitPerUser: c.UsageLimitPerUser,
+		MinOrderAmount:    c.MinOrderAmount,
+		Active:            c.Active,
+		IconURL:           c.IconURL,
+		CoverURL:          c.CoverURL,
+		CreatedAt:         c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:         c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if c.ValidFrom != nil {
+		s := c.ValidFrom.Format("2006-01-02T15:04:05Z")
+		out.ValidFrom = &s
+	}
+	if c.ValidUntil != nil {
+		s := c.ValidUntil.Format("2006-01-02T15:04:05Z")
+		out.ValidUntil = &s
+	}
+	return out
+}
+
 // OrderOutput represents an order in the admin list
 type OrderOutput struct {
 	ID            string            `json:"id"`

@@ -81,6 +81,10 @@ func RegisterRoutes(app *gin.Engine, useCases *usecases.Usecases, wsHandler *web
 		admin.DELETE("/imports", adminHandler.NewClearImportsHandler(useCases.Admin.ClearImports))
 		admin.POST("/uploads/presign", adminHandler.NewPresignUploadHandler(useCases.Admin.PresignUpload))
 		admin.DELETE("/uploads", adminHandler.NewDeleteUploadHandler(useCases.Admin.DeleteUpload))
+		admin.GET("/coupons", adminHandler.NewListCouponsHandler(useCases.Admin.ListCoupons))
+		admin.POST("/coupons", adminHandler.NewCreateCouponHandler(useCases.Admin.CreateCoupon))
+		admin.PUT("/coupons/:id", adminHandler.NewUpdateCouponHandler(useCases.Admin.UpdateCoupon))
+		admin.DELETE("/coupons/:id", adminHandler.NewDeleteCouponHandler(useCases.Admin.DeleteCoupon))
 	}
 
 	// Payment routes (require auth)

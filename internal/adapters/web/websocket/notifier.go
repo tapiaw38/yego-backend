@@ -13,16 +13,32 @@ func NewNotifier(hub *Hub) *Notifier {
 }
 
 func (n *Notifier) NotifyOrderClaimed(payload notification.OrderClaimedPayload) error {
-	wsPayload := OrderClaimedPayload{
+	return n.hub.NotifyOrderClaimed(OrderClaimedPayload{
 		OrderID:   payload.OrderID,
 		UserID:    payload.UserID,
 		ProfileID: payload.ProfileID,
 		Status:    payload.Status,
 		ETA:       payload.ETA,
 		ClaimedAt: payload.ClaimedAt,
-	}
+	})
+}
 
-	return n.hub.NotifyOrderClaimed(wsPayload)
+func (n *Notifier) NotifyOrderCreated(payload notification.OrderCreatedPayload) error {
+	return n.hub.NotifyOrderCreated(OrderCreatedPayload{
+		OrderID:   payload.OrderID,
+		ProfileID: payload.ProfileID,
+		Status:    payload.Status,
+		ETA:       payload.ETA,
+		CreatedAt: payload.CreatedAt,
+	})
+}
+
+func (n *Notifier) NotifyOrderUpdated(payload notification.OrderUpdatedPayload) error {
+	return n.hub.NotifyOrderUpdated(OrderUpdatedPayload{
+		OrderID: payload.OrderID,
+		Status:  payload.Status,
+		ETA:     payload.ETA,
+	})
 }
 
 var _ notification.Service = (*Notifier)(nil)

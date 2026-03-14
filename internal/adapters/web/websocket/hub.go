@@ -12,6 +12,7 @@ type NotificationType string
 
 const (
 	OrderClaimedNotification NotificationType = "order_claimed"
+	OrderCreatedNotification NotificationType = "order_created"
 	OrderUpdatedNotification NotificationType = "order_updated"
 )
 
@@ -27,6 +28,20 @@ type OrderClaimedPayload struct {
 	Status    string `json:"status"`
 	ETA       string `json:"eta"`
 	ClaimedAt string `json:"claimed_at"`
+}
+
+type OrderCreatedPayload struct {
+	OrderID   string `json:"order_id"`
+	ProfileID string `json:"profile_id,omitempty"`
+	Status    string `json:"status"`
+	ETA       string `json:"eta"`
+	CreatedAt string `json:"created_at"`
+}
+
+type OrderUpdatedPayload struct {
+	OrderID string `json:"order_id"`
+	Status  string `json:"status"`
+	ETA     string `json:"eta"`
 }
 
 type Client struct {
@@ -98,11 +113,15 @@ func (h *Hub) BroadcastNotification(notification Notification) error {
 }
 
 func (h *Hub) NotifyOrderClaimed(payload OrderClaimedPayload) error {
-	notification := Notification{
-		Type:    OrderClaimedNotification,
-		Payload: payload,
-	}
-	return h.BroadcastNotification(notification)
+	return h.BroadcastNotification(Notification{Type: OrderClaimedNotification, Payload: payload})
+}
+
+func (h *Hub) NotifyOrderCreated(payload OrderCreatedPayload) error {
+	return h.BroadcastNotification(Notification{Type: OrderCreatedNotification, Payload: payload})
+}
+
+func (h *Hub) NotifyOrderUpdated(payload OrderUpdatedPayload) error {
+	return h.BroadcastNotification(Notification{Type: OrderUpdatedNotification, Payload: payload})
 }
 
 func (h *Hub) GetClientCount() int {

@@ -20,6 +20,10 @@ type Usecases struct {
 	ClearImports     ClearImportsUsecase
 	PresignUpload    PresignUploadUsecase
 	DeleteUpload     DeleteUploadUsecase
+	ListCoupons      ListCouponsUsecase
+	CreateCoupon     CreateCouponUsecase
+	UpdateCoupon     UpdateCouponUsecase
+	DeleteCoupon     DeleteCouponUsecase
 }
 
 // NewUsecases creates all admin use cases
@@ -37,5 +41,9 @@ func NewUsecases(contextFactory appcontext.Factory, calculateDeliveryFeeUse sett
 		ClearImports:     NewClearImportsUsecase(contextFactory),
 		PresignUpload:    NewPresignUploadUsecase(s3Client),
 		DeleteUpload:     NewDeleteUploadUsecase(s3Client),
+		ListCoupons:      NewListCouponsUsecase(contextFactory),
+		CreateCoupon:     NewCreateCouponUsecase(contextFactory),
+		UpdateCoupon:     NewUpdateCouponUsecase(contextFactory),
+		DeleteCoupon:     NewDeleteCouponUsecase(contextFactory),
 	}
 }

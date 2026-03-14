@@ -19,11 +19,11 @@ type Usecases struct {
 // NewUsecases creates all order use cases
 func NewUsecases(contextFactory appcontext.Factory, notificationSvc notification.Service, calculateDeliveryFeeUse settingsUsecase.CalculateDeliveryFeeUsecase) *Usecases {
 	return &Usecases{
-		Create:         NewCreateUsecase(contextFactory, calculateDeliveryFeeUse),
+		Create:         NewCreateUsecase(contextFactory, calculateDeliveryFeeUse, notificationSvc),
 		CreateWithLink: NewCreateWithLinkUsecase(contextFactory),
 		Claim:          NewClaimUsecase(contextFactory, notificationSvc, calculateDeliveryFeeUse),
 		Get:            NewGetUsecase(contextFactory),
-		UpdateStatus:   NewUpdateStatusUsecase(contextFactory, calculateDeliveryFeeUse),
+		UpdateStatus:   NewUpdateStatusUsecase(contextFactory, calculateDeliveryFeeUse, notificationSvc),
 		ListMyOrders:   NewListMyOrdersUsecase(contextFactory),
 	}
 }

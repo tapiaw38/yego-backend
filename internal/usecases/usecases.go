@@ -53,6 +53,10 @@ type Admin struct {
 	ClearImports            admin.ClearImportsUsecase
 	PresignUpload           admin.PresignUploadUsecase
 	DeleteUpload            admin.DeleteUploadUsecase
+	ListCoupons             admin.ListCouponsUsecase
+	CreateCoupon            admin.CreateCouponUsecase
+	UpdateCoupon            admin.UpdateCouponUsecase
+	DeleteCoupon            admin.DeleteCouponUsecase
 }
 
 type Settings struct {
@@ -74,7 +78,7 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 
 	return &Usecases{
 		Order: Order{
-			CreateUsecase:               order.NewCreateUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			CreateUsecase:               order.NewCreateUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase, notifier),
 			CreateWithLinkUsecase:       order.NewCreateWithLinkUsecase(contextFactory),
 			ClaimUsecase:                order.NewClaimUsecase(contextFactory, notifier, settingsUsecases.CalculateDeliveryFeeUsecase),
 			GetUsecase:                  order.NewGetUsecase(contextFactory),
@@ -82,7 +86,7 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 			PayForOrderUsecase:          order.NewPayForOrderUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			CreatePaymentLinkUsecase:    order.NewCreatePaymentLinkUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
 			HandlePaymentWebhookUsecase: order.NewHandlePaymentWebhookUsecase(contextFactory),
-			UpdateStatusUsecase:         order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase),
+			UpdateStatusUsecase:         order.NewUpdateStatusUsecase(contextFactory, settingsUsecases.CalculateDeliveryFeeUsecase, notifier),
 			ListMyOrdersUsecase:         order.NewListMyOrdersUsecase(contextFactory),
 		},
 		Profile: Profile{
@@ -107,6 +111,10 @@ func CreateUsecases(contextFactory appcontext.Factory, s3Client *s3service.Clien
 			ClearImports:            admin.NewClearImportsUsecase(contextFactory),
 			PresignUpload:           admin.NewPresignUploadUsecase(s3Client),
 			DeleteUpload:            admin.NewDeleteUploadUsecase(s3Client),
+			ListCoupons:             admin.NewListCouponsUsecase(contextFactory),
+			CreateCoupon:            admin.NewCreateCouponUsecase(contextFactory),
+			UpdateCoupon:            admin.NewUpdateCouponUsecase(contextFactory),
+			DeleteCoupon:            admin.NewDeleteCouponUsecase(contextFactory),
 		},
 		Settings: settingsUsecases,
 	}
