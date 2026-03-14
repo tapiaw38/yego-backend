@@ -98,6 +98,16 @@ func (u *createPaymentLinkUsecase) Execute(ctx context.Context, input CreatePaym
 		payerEmail = fmt.Sprintf("%s@yego.local", profile.UserID)
 	}
 
+	// Validate that no item has a zero or missing price before generating a payment link
+	if order.Data != nil {
+		for _, item := range order.Data.Items {
+			if item.Price <= 0 {
+				return nil, apperrors.NewApplicationError(mappings.OrderPaymentFailedError,
+					fmt.Errorf("item '%s' has no price set, cannot generate payment link", item.Name))
+			}
+		}
+	}
+
 	// Calculate items subtotal
 	var itemsTotal float64
 	if order.Data != nil {

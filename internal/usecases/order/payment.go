@@ -47,6 +47,15 @@ func ProcessPaymentForOrder(ctx context.Context, app *appcontext.Context, order 
 		return fmt.Errorf("user has no payment method configured")
 	}
 
+	// Validate that no item has a zero or missing price before charging
+	if order.Data != nil {
+		for _, item := range order.Data.Items {
+			if item.Price <= 0 {
+				return fmt.Errorf("item '%s' has no price set, cannot process payment", item.Name)
+			}
+		}
+	}
+
 	orderTotal, calcErr := calculateOrderTotal(ctx, app, order, profile, calculateDeliveryFeeUse)
 	if calcErr != nil {
 		return fmt.Errorf("failed to calculate order total: %w", calcErr)
