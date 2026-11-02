@@ -14,7 +14,7 @@ type Integration interface {
 	HasPaymentMethod(userID string) (bool, error)
 	GetDefaultPaymentMethod(userID string) (*PaymentMethod, error)
 	ProcessPaymentWithSavedMethod(userID string, amount float64, description string, externalReference string, payerEmail string, collectorID string, securityCode string) (*ProcessPaymentResponse, error)
-	CreatePreference(items []PreferenceItem, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error)
+	CreatePreference(items []PreferenceItem, userID string, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error)
 }
 
 type ProcessPaymentResponse struct {
@@ -158,7 +158,7 @@ func (i *integration) GetDefaultPaymentMethod(userID string) (*PaymentMethod, er
 	return &paymentMethod, nil
 }
 
-func (i *integration) CreatePreference(items []PreferenceItem, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error) {
+func (i *integration) CreatePreference(items []PreferenceItem, userID string, payerEmail string, externalReference string, backURLSuccess string, backURLFailure string, backURLPending string, notificationURL string) (*PreferenceResponse, error) {
 	url := fmt.Sprintf("%s/api/v1/payments/preferences", i.baseURL)
 
 	type backURLsPayload struct {
@@ -168,6 +168,7 @@ func (i *integration) CreatePreference(items []PreferenceItem, payerEmail string
 	}
 	type preferencePayload struct {
 		Items             []PreferenceItem `json:"items"`
+		UserID            string          `json:"user_id"`
 		PayerEmail        string          `json:"payer_email"`
 		ExternalReference string          `json:"external_reference"`
 		BackURLs          backURLsPayload `json:"back_urls"`
@@ -176,6 +177,7 @@ func (i *integration) CreatePreference(items []PreferenceItem, payerEmail string
 
 	payload := preferencePayload{
 		Items:             items,
+		UserID:            userID,
 		PayerEmail:        payerEmail,
 		ExternalReference: externalReference,
 		BackURLs: backURLsPayload{
