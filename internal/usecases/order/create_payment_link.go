@@ -188,6 +188,7 @@ func (u *createPaymentLinkUsecase) Execute(ctx context.Context, input CreatePaym
 
 	prefResp, prefErr := app.Integrations.Payments.CreatePreference(
 		prefItems,
+		input.UserID,
 		payerEmail,
 		order.ID,
 		orderURL,
